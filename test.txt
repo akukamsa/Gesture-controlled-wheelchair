@@ -1,0 +1,144 @@
+#define F_CPU 8000000UL
+#include <avr/io.h>
+#include <util/delay.h>
+#include <stdio.h>
+#include "ADC_H.h"
+
+int main(void)
+{
+	int ADC_Value,x,y,ADC_Value1,ADC_Value2;
+	int z1=0,z2=0,z3=0,z4=0;
+	int switch;
+	ADC_Init();		/* Initialize ADC */
+	switch=0;
+
+	while(1)
+	{
+		ADC_Value1 = ADC_Read(0);     /* Read the status on X-OUT pin using channel 0 */
+		
+		ADC_Value2 = ADC_Read(1);/* Read the status on Y-OUT pin using channel 1 */
+		
+
+		ADC_Value = ADC_Read(2);/* Read the status on SWITCH pin using channel 2 */
+		
+		x=ADC_Value1;
+		y=ADC_Value2;
+
+		if(ADC_Value < 600)
+			switch=0; //switch open
+ 		else
+			switch=1;//switch pressed
+		if(switch==1)
+		{
+		
+			PORTC=0x04;
+			PORTD=0x00;		
+		}
+		else
+		{
+			PORTC=PORTC & 0xFB;//remove if not required......
+			if(y<342)
+			{
+				//go back
+				if(x<342)
+				{
+					PORTC=0x01;
+					if(z1==0)
+					{
+						//south west
+						PORTD=0x01;
+						z1=1;
+					}
+					else
+						z1=0;
+				}
+				else
+				if(x<684)
+				{
+					//south
+					PORTC=0x01;
+					PORTD=0x01;
+
+				}
+				else
+				{
+					PORTD=0x01;
+					if(z2==0)
+					{
+						//south east
+						PORTC=0x01;
+						z2=1;
+					}
+					else
+						z2=0;
+				
+				}
+			}
+			else
+			if(y<684)
+			{
+				//centre
+				if(x<342)
+				{
+					//west
+					PORTC=0x00;
+					PORTD=0x02;
+				}
+				else
+				if(x<684)
+				{
+					//no reaction
+					PORTC=0x00;
+					PORTD=0x00;
+				}
+				else
+				{
+					//east
+					PORTC=0x02;
+					PORTD=0x00;
+				
+				}
+			}
+			else
+			{
+				//front
+				if(x<342)
+				{
+					PORTC=0x02;
+					if(z3==0)
+					{
+						//north west
+						
+						PORTD=0x02;
+						z3=1;
+					}
+					else
+						z3=0;
+				}
+				else
+				if(x<684)
+				{
+					//north
+					PORTC=0x02;
+					PORTD=0x02;
+				}
+				else
+				{
+					PORTD=0x02;
+					if(z4==0)
+					{
+						//north east
+						PORTC=0x02;	
+						
+					}
+					else
+						z4=0;					
+				}
+				
+			}
+
+		}
+		
+		
+	}
+}
